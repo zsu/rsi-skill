@@ -1,0 +1,24 @@
+{
+  "name": "rsi-skill",
+  "version": "0.1.0",
+  "description": "Recursive self-improvement for Agent Skills: generates fresh eval cases every iteration, runs the target skill headless in sandboxes, grades findings, promotes a challenger only on held-out evidence, and stops on goal, budget, plateau or an unreachable goal.",
+  "author": {
+    "name": "zsu"
+  },
+  "homepage": "https://github.com/zsu/rsi-skill",
+  "repository": "https://github.com/zsu/rsi-skill",
+  "keywords": ["skills", "evals", "self-improvement", "rsi", "benchmark"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "RSI Skill",
+    "shortDescription": "Evaluate and improve a skill until a goal is met",
+    "longDescription": "Profiles a target Agent Skill, writes a measurable goal, then iterates: fresh eval cases each iteration, headless sandboxed runs, deterministic checks plus evidence-based grading, an improver that can edit anything in the skill, and a champion/challenger gate judged on held-out cases. Stops on goal, limits, plateau or an unreachable goal.",
+    "developerName": "zsu",
+    "category": "Developer Tools",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Run rsi-skill against ../my-skill until no major problems, max 3 iterations, $20."
+    ],
+    "websiteURL": "https://github.com/zsu/rsi-skill"
+  }
+}
