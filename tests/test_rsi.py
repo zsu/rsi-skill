@@ -220,6 +220,15 @@ class TestRunCase(TmpCase):
              "input": {"command": "python C:\\x\\sandbox\\.claude\\skills\\csv-summary\\scripts\\summarize.py a.csv"}}]}})]
         self.assertEqual(run_case.parse_stream(lines, "csv-summary")["skill_invocations"], ["Bash:skill-files"])
         self.assertEqual(run_case.parse_stream(lines, "other")["skill_invocations"], [])
+        # the skill folder with no trailing slash counts; a sibling folder sharing the prefix does not
+        cd = [json.dumps({"type": "assistant", "message": {"content": [
+            {"type": "tool_use", "name": "Bash",
+             "input": {"command": "cd C:/x/plugin/data-analyst/skills/data-analyst && python scripts/fetch.py"}}]}})]
+        self.assertEqual(run_case.parse_stream(cd, "data-analyst")["skill_invocations"], ["Bash:skill-files"])
+        self.assertEqual(run_case.parse_stream(cd, "data")["skill_invocations"], [])
+        sib = [json.dumps({"type": "assistant", "message": {"content": [
+            {"type": "tool_use", "name": "Read", "input": {"file_path": "C:/x/skills/csv-summary-v2/SKILL.md"}}]}})]
+        self.assertEqual(run_case.parse_stream(sib, "csv-summary")["skill_invocations"], [])
 
     def new_run_second(self, **kw):
         repo = make_git_copy(TOY, self.tmp / "toy2")

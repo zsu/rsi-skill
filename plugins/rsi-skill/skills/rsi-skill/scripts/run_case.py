@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -94,6 +95,8 @@ def parse_stream(lines: list, skill_name: str) -> dict:
     m = {"tool_calls": {}, "total_tool_calls": 0, "skill_invocations": [], "result": None,
          "cost_usd": None, "usage": {}, "num_turns": None, "is_error": None, "result_subtype": None,
          "skills_listed": None, "api_duration_ms": None}
+    # the skill folder itself counts too ("cd .../skills/x && ..."), but not a sibling like skills/x-extra
+    skill_dir = re.compile(re.escape(f"skills/{skill_name}") + r"(?![\w.-])")
     for line in lines:
         try:
             ev = json.loads(line)
@@ -117,7 +120,7 @@ def parse_stream(lines: list, skill_name: str) -> dict:
                         # an explicit /skill prompt is expanded inline (no Skill tool call), so also count
                         # any tool call that touches the skill's own files
                         blob = json.dumps(inp, ensure_ascii=False).replace("\\\\", "/").replace("\\", "/")
-                        if f"skills/{skill_name}/" in blob and f"{name}:skill-files" not in m["skill_invocations"]:
+                        if skill_dir.search(blob) and f"{name}:skill-files" not in m["skill_invocations"]:
                             m["skill_invocations"].append(f"{name}:skill-files")
         elif typ == "result":
             m["result"] = ev.get("result")
