@@ -477,6 +477,52 @@ class TestLeakAndCases(TmpCase):
         _, v = sh("anchors.py", "validate", "--run-dir", run, check=0)
         self.assertEqual(v["problems"], [])
 
+    def test_anchor_keeps_case_helpers(self):
+        run = self.new_run()
+        verify = [{"id": "verify", "type": "command", "cmd": "{python} -I {case}/verify.py {sandbox}/out.txt",
+                   "expect_exit": 0, "severity": "critical"}]
+        cdir = write_case(run, 0, "i000-hv", deterministic_checks=verify)
+        (cdir / "verify.py").write_text("import sys\nsys.exit(0 if 'Summarize' in open(sys.argv[1]).read() else 1)\n",
+                                        encoding="utf-8")
+        (cdir / "__pycache__").mkdir()
+        (cdir / "__pycache__" / "verify.cpython-313.pyc").write_bytes(b"x")
+        # a check that needs a helper the case does not have is refused
+        write_case(run, 0, "i000-nohelper", deterministic_checks=verify)
+        code, _ = sh("anchors.py", "add", "--run-dir", run, "--iteration", 0, "--case", "i000-nohelper")
+        self.assertNotEqual(code, 0)
+
+        _, out = sh("anchors.py", "add", "--run-dir", run, "--iteration", 0, "--case", "i000-hv", "--why", "gt", check=0)
+        base = Path(out["path"]).parent
+        ev = rsilib.read_json(Path(out["path"]))["evals"][0]
+        self.assertEqual(ev["rsi"]["case_files"], ["case/hv/verify.py"])
+        self.assertEqual(ev["files"], ["files/hv/data.csv"])
+        self.assertTrue((base / "case/hv/verify.py").exists())
+        self.assertFalse((base / "files/hv/verify.py").exists())
+
+        _, ex = sh("anchors.py", "export", "--run-dir", run, "--iteration", 1, check=0)
+        self.assertEqual(ex["exported"], ["anchor-hv"])
+        adir = run / "iterations/001/cases/anchor-hv"
+        self.assertTrue((adir / "verify.py").exists())
+        self.assertFalse((adir / "files/verify.py").exists(), "helpers must never reach the sandbox")
+        _, m = sh("run_case.py", "--run-dir", run, "--iteration", 1, "--case", adir, "--candidate", "v0",
+                  "--role", "champion", "--claude-cmd", json.dumps(FAKE), check=0)
+        self.assertFalse((Path(m["sandbox"]) / "verify.py").exists())
+        _, ch = sh("check_case.py", "--run-dir", run, "--iteration", 1, "--case-id", "anchor-hv", "--role", "champion",
+                   check=0)
+        self.assertEqual(ch["summary"]["passed"], 1, ch)
+        _, v = sh("anchors.py", "validate", "--run-dir", run, check=0)
+        self.assertEqual(v["problems"], [])
+
+        # an older entry without rsi.case_files still exports; validate names the missing helper
+        data = rsilib.read_json(Path(out["path"]))
+        del data["evals"][0]["rsi"]["case_files"]
+        rsilib.write_json(Path(out["path"]), data)
+        _, ex = sh("anchors.py", "export", "--run-dir", run, "--iteration", 2, check=0)
+        self.assertTrue((run / "iterations/002/cases/anchor-hv/files/data.csv").exists())
+        code, v = sh("anchors.py", "validate", "--run-dir", run)
+        self.assertEqual(code, 1)
+        self.assertIn("{case}/verify.py", json.dumps(v["problems"]))
+
 
 class TestApply(TmpCase):
     def test_apply_and_conflict(self):

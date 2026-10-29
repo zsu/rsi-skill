@@ -86,6 +86,7 @@ Written by the case generator to `iterations/NNN/cases/<id>/case.json`. Input fi
 - `invoke`: `explicit` prefixes the prompt with the skill's slash command. `natural` relies on the description to trigger the skill, and is used to test triggering. Use `natural` for at most 1 case in 4, and add a `skill_invoked` check.
 - `interaction`: `none` means no user is available, so the run must finish without asking. `questions_ok` means asking a clarifying question and stopping is a correct outcome (the grader judges whether the question was needed).
 - Check types and placeholders are listed in `scripts/check_case.py --help`.
+- Helper files for checks (an expected-value script such as `verify.py`, small reference data) go in the case folder beside `case.json`, never in `files/`: the sandbox gets `files/`, so a helper there would show the skill the answer. Checks call them as `{python} -I {case}/verify.py ...`. Anchors keep them too (`rsi.case_files` in `evals.json`, see [anchors.md](anchors.md)).
 
 ## grading.json
 

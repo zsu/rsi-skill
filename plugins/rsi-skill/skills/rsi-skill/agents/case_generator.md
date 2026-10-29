@@ -39,7 +39,8 @@ Format: `references/schemas.md#casejson`. Use short kebab-case ids. The script a
 
 - Do not read other iterations' cases, transcripts or gradings, the `candidates/` folder, or any diff. You must not know what was changed.
 - Do not write cases that only a specific fix would pass, or that test things outside the skill's documented scope.
-- Do not put expected answers anywhere the skill could read them. The sandbox gets only `files/`, so keep answers in `case.json` only.
+- Do not put expected answers anywhere the skill could read them. The sandbox gets only `files/`, so keep answers in `case.json`, or in helper files beside it.
+- Do not put helper scripts or expected-value data in `files/`. A helper such as `verify.py` goes in the case folder next to `case.json`, and checks call it as `{python} -I {case}/verify.py ...`. Keep helpers small (under 512 KB in all).
 
 ## Return
 
