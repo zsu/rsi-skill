@@ -23,20 +23,20 @@ version is written back as **uncommitted** edits for you to review with `git dif
 
 ## Install
 
-rsi-skill is listed in the `zsu-dev` marketplace of the [zsu/agent-plugins](https://github.com/zsu/agent-plugins)
-catalog (its `dev` branch). It installs from this repo on GitHub.
+rsi-skill is listed in the `zsu` marketplace of the [zsu/agent-plugins](https://github.com/zsu/agent-plugins)
+catalog. It installs from this repo on GitHub.
 
 **Claude Code:**
 
 ```
-/plugin marketplace add zsu/agent-plugins@dev
-/plugin install rsi-skill@zsu-dev
+/plugin marketplace add zsu/agent-plugins
+/plugin install rsi-skill@zsu
 ```
 
 **Codex:**
 
 ```
-codex plugin marketplace add zsu/agent-plugins@dev
+codex plugin marketplace add zsu/agent-plugins
 ```
 
 Then install `rsi-skill` from the Plugins directory. The test runs drive the `claude` CLI headless, so Claude

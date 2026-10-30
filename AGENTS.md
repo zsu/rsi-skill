@@ -5,7 +5,7 @@ This repo holds one skill, `plugins/rsi-skill/skills/rsi-skill/`, shipped as the
 - **Manifests:** one per harness, sharing the same `skills/` folder.
   - Claude: `plugins/rsi-skill/.claude-plugin/plugin.json`
   - Codex: `plugins/rsi-skill/.codex-plugin/plugin.json`, with `"skills": "./skills/"`
-- **Marketplace:** none in this repo. The plugin is listed in the `zsu-dev` marketplace on the `dev` branch of `zsu/agent-plugins`, which installs it from this repo on GitHub with a `git-subdir` source.
+- **Marketplace:** none in this repo. The plugin is listed in the `zsu` marketplace of `zsu/agent-plugins`, which installs it from this repo on GitHub with a `git-subdir` source.
 - **Local development:** use `claude --plugin-dir plugins/rsi-skill`.
 
 ## Checks before a change lands
