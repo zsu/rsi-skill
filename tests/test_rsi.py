@@ -562,6 +562,21 @@ class TestBudget(TmpCase):
         self.assertIn("tokens", out["exceeded"])
         self.assertGreater(out["cost_usd_estimated_agents"], 0)
 
+    def test_check_stop_records_limit_in_state(self):
+        # a reserve that cannot fit stops the run: without --stop state.json still read "running"
+        run = self.new_run(max_tokens=1000)
+        code, _ = sh("budget.py", "check", "--run-dir", run, "--reserve-tokens", 10, "--stop")
+        self.assertEqual(code, 0)
+        self.assertNotEqual(rsilib.read_json(Path(run) / "state.json")["status"], "stopped")
+        code, _ = sh("budget.py", "check", "--run-dir", run, "--reserve-tokens", 5000)
+        self.assertEqual(code, 3)
+        self.assertNotEqual(rsilib.read_json(Path(run) / "state.json")["status"], "stopped")
+        code, out = sh("budget.py", "check", "--run-dir", run, "--reserve-tokens", 5000, "--stop")
+        self.assertEqual(code, 3)
+        st = rsilib.read_json(Path(run) / "state.json")
+        self.assertEqual((st["status"], st["stop_reason"], st["phase"]), ("stopped", "limit:tokens", "finish"))
+        self.assertEqual(out["stop_reason"], "limit:tokens")
+
 
 class TestStructure(unittest.TestCase):
     def test_own_skill_structure(self):

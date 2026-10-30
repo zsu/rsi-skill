@@ -3,7 +3,7 @@
 
     python -I budget.py add    --run-dir R --kind subagent|orchestrator|other --tokens N [--cost-usd X] [--note "..."]
     python -I budget.py status --run-dir R
-    python -I budget.py check  --run-dir R [--reserve-usd X] [--reserve-tokens N]
+    python -I budget.py check  --run-dir R [--reserve-usd X] [--reserve-tokens N] [--stop]
     python -I budget.py set-limits --run-dir R [--max-cost-usd X] [--max-tokens N] [--max-hours H]
         [--max-iterations N] [--cases N] [--parallel N] [--timeout S] [--max-cost-per-case-usd X]
         [--patience N] [--max-turns N]
@@ -11,6 +11,8 @@
 Case runs are recorded automatically by run_case.py (real total_cost_usd from Claude Code).
 Subagent and orchestrator usage is recorded as tokens and priced at limits.subagent_usd_per_mtok
 (an estimate). `check` exits 3 when a limit is reached (or would be, with the reserve), else 0.
+With --stop, a check that exits 3 also records the stop in state.json (status "stopped",
+stop_reason "limit:<what>", phase "finish"), so status, report and resume see a finished run.
 """
 from __future__ import annotations
 
@@ -80,6 +82,8 @@ def main() -> None:
         p.add_argument("--run-dir", required=True)
         p.add_argument("--reserve-usd", type=float, default=0.0)
         p.add_argument("--reserve-tokens", type=int, default=0)
+        if name == "check":
+            p.add_argument("--stop", action="store_true", help="record a limit stop in state.json on exit 3")
     a = ap.parse_args()
     if a.cmd == "add":
         run = rsilib.Run(a.run_dir)
@@ -98,6 +102,12 @@ def main() -> None:
         rsilib.write_json(run.dir / "config.json", cfg)
         rsilib.emit({"limits": cfg["limits"]})
     s = status(a.run_dir, a.reserve_usd, a.reserve_tokens)
+    if a.cmd == "check" and s["exceeded"] and a.stop:
+        run = rsilib.Run(a.run_dir)
+        state = run.state
+        state.update(status="stopped", stop_reason="limit:" + ",".join(s["exceeded"]), phase="finish")
+        run.save_state(state)
+        s["stop_reason"] = state["stop_reason"]
     rsilib.emit(s, 3 if (a.cmd == "check" and s["exceeded"]) else 0)
 
 

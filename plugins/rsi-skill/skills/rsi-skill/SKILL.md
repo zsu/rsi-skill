@@ -172,7 +172,7 @@ py <rsi>/scripts/aggregate.py decide --run-dir <run> --iteration N --dry-run
    - **Static gates:** `py <rsi>/scripts/static_gates.py --run-dir <run> --candidate vK`
    - **Overfit review:** spawn a reviewer with [agents/overfit_reviewer.md](agents/overfit_reviewer.md), giving it the patch file, the `approach` from the meta, the skill dir, and `out = <run>/candidates/vK.overfit.json`. Give it **no** cases or findings.
 5. **One revision if a check fails.** If any check fails, send the failures to the improver (continue the same agent if you can) for one revision, then repeat step 4. If it still fails, run `py <rsi>/scripts/candidate.py reject --run-dir <run> --candidate vK --reason "<why>"`. That counts as a failed attempt, and the next iteration is champion-only.
-6. **Move on.** Return to step 3 with N + 1. First run `py <rsi>/scripts/budget.py check --run-dir <run> --reserve-usd <one iteration's cost>`. On exit 3, stop as `limit` and go to step 8.
+6. **Move on.** Return to step 3 with N + 1. First run `py <rsi>/scripts/budget.py check --run-dir <run> --reserve-usd <one iteration's cost> --stop`. On exit 3 the stop is recorded in `state.json` as `limit`: go to step 8. Run this check before spawning the improver too, so no challenger is written that cannot be evaluated.
 
 When `next_action` is `confirm`, skip this step and go straight to step 3 with N + 1, which runs the champion only.
 
