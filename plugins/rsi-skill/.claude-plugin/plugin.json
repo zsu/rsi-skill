@@ -1,6 +1,6 @@
 {
   "name": "rsi-skill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Recursive self-improvement for Agent Skills: generates fresh eval cases every iteration, runs the target skill headless in sandboxes, grades findings, promotes a challenger only on held-out evidence, and stops on goal, budget, plateau or an unreachable goal.",
   "author": {
     "name": "zsu"
