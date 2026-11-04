@@ -382,6 +382,15 @@ class TestDecide(TmpCase):
         self.assertTrue(d["clean"], d)
         self.assertEqual(d["remaining_blocking_keys"], [])
 
+    def test_off_scale_low_severity_does_not_block(self):
+        # graders sometimes write "trivial"; it must not fall back to major
+        _, d = self.it(0, "v0", {"i000-a": [("typo", "trivial", "skill_general")],
+                                 "i000-b": [("odd", "Cosmetic", "skill_general")], "i000-c": []})
+        self.assertTrue(d["clean"], d)
+        self.assertEqual(d["remaining_blocking_keys"], [])
+        self.assertEqual(rsilib.severity_rank("trivial"), rsilib.severity_rank("nit"))
+        self.assertEqual(rsilib.severity_rank("unheard-of"), rsilib.severity_rank("major"))
+
     def test_plateau_then_divergent_then_stop(self):
         bug = [("b1", "major", "skill_general")]
         same = {"x": bug, "y": bug}

@@ -15,6 +15,8 @@ import threading
 from pathlib import Path
 
 SEVERITIES = ["nit", "minor", "major", "critical"]
+# Words graders use outside the scale; anything else unknown still counts as major.
+SEVERITY_ALIASES = {"trivial": "nit", "cosmetic": "nit", "style": "nit", "low": "minor", "blocker": "critical"}
 # Never copied into a candidate or the sandbox, whatever git says.
 ALWAYS_EXCLUDE_DIRS = {".git", "__pycache__", ".pytest_cache", "node_modules", ".venv", "venv"}
 # Excluded when the target is not a git repo (git's ignore rules do this job otherwise).
@@ -350,7 +352,8 @@ class Run:
 
 def severity_rank(sev: str) -> int:
     try:
-        return SEVERITIES.index((sev or "major").lower())
+        sev = (sev or "major").strip().lower()
+        return SEVERITIES.index(SEVERITY_ALIASES.get(sev, sev))
     except ValueError:
         return SEVERITIES.index("major")
 
