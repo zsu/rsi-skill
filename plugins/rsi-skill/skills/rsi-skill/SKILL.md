@@ -85,14 +85,14 @@ If a gate fails only because of the environment (for example `claude plugin vali
 2. **Goal.** Write `<run>/goal.json` from the user's goal, using [references/goals.md](references/goals.md).
 3. **Size the run.**
    - Cases per iteration: `profile.cases_per_iteration` unless the user set one.
-   - Cost per iteration ≈ cases × cost per case × 2 (paired), plus about 30% for agents.
+   - Cost per iteration ≈ (cases + anchors) × cost per case × 2 (paired), plus about 30% for agents. Count the anchors with `py <rsi>/scripts/anchors.py list --run-dir <run>`; they run on every iteration.
    - Default cost cap: that per-iteration cost × (max_iterations + 1), rounded up.
    - Apply the numbers with `py <rsi>/scripts/budget.py set-limits --run-dir <run> --cases N --max-cost-usd X [--timeout S]`. Set the timeout to about 2.5 × `est_minutes_per_case`.
 4. **Confirm once.** Unless `--unattended` is set, ask one question with your question tool showing: the target and its kind, the goal as compiled, cases per iteration, the limits, the estimated cost and time, and the workspace path. Offer "Start", "Change limits" and "Report only". Apply any changes the user makes. With `--unattended`, state the same facts in one message and start.
 
 ## 3. Generate fresh cases (each iteration `N`, starting at 0)
 
-1. **Anchors.** `py <rsi>/scripts/anchors.py export --run-dir <run> --iteration N` copies any persistent anchors into this iteration's cases.
+1. **Anchors.** `py <rsi>/scripts/anchors.py export --run-dir <run> --iteration N` copies any persistent anchors into this iteration's cases. Put any `warnings` it prints (more anchors than the cap) in the report.
 2. **Context for the generator.**
    - `py <rsi>/scripts/cases.py bank --run-dir <run>` gives summaries of earlier cases, to avoid repeats.
    - `py <rsi>/scripts/cases.py probes --run-dir <run>` gives the failure categories seen so far, with no details.

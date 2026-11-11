@@ -485,6 +485,22 @@ class TestLeakAndCases(TmpCase):
         self.assertTrue((run / "iterations/001/cases/anchor-gt/files/data.csv").exists())
         _, v = sh("anchors.py", "validate", "--run-dir", run, check=0)
         self.assertEqual(v["problems"], [])
+        self.assertEqual((ex["count"], ex["warnings"]), (1, []))
+
+    def test_anchor_export_warns_over_cap(self):
+        # an anchor file written by hand can hold more than the cap; every anchor then runs twice per iteration
+        run = self.new_run()
+        write_case(run, 0, "i000-gt", ground_truth={"value": 2.5})
+        _, out = sh("anchors.py", "add", "--run-dir", run, "--iteration", 0, "--case", "i000-gt", "--why", "stable", check=0)
+        path = Path(out["path"])
+        data = rsilib.read_json(path)
+        data["evals"] = [dict(data["evals"][0], id=f"gt{i}") for i in range(9)]
+        rsilib.write_json(path, data)
+        code, ex = sh("anchors.py", "export", "--run-dir", run, "--iteration", 1)
+        self.assertEqual(code, 0, ex)
+        self.assertEqual(ex["count"], 9)
+        self.assertEqual(len(ex["warnings"]), 1)
+        self.assertIn("9 anchors > 8", ex["warnings"][0])
 
     def test_anchor_keeps_case_helpers(self):
         run = self.new_run()

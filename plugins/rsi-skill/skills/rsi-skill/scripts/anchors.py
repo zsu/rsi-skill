@@ -17,7 +17,7 @@ the case's own and must never reach the sandbox. add stores them under case/<id>
 {case}/verify.py still resolve. Entries without "rsi.case_files" export as before.
 
 export copies every anchor into iterations/NNN/cases/anchor-<id>/ (case.anchor = true) so it runs
-beside the fresh cases as a regression guard. add copies a case from this run into the anchor
+beside the fresh cases as a regression guard, and warns when there are more than 8. add copies a case from this run into the anchor
 file (in the target, uncommitted). An anchor needs a ground truth or at least one deterministic
 check, at most 8 anchors, at most 2 MB of input files and 512 KB of helper files each, and every
 {case}/... path a check uses must be a helper file (--force overrides the last three).
@@ -154,7 +154,11 @@ def main() -> None:
                     shutil.copy2(base / f, d / rel)
             rsilib.write_json(d / "case.json", c)
             out.append(c["id"])
-        rsilib.emit({"exported": out, "from": str(path)})
+        warnings = []
+        if len(out) > MAX_ANCHORS:
+            warnings.append(f"{len(out)} anchors > {MAX_ANCHORS}: every one runs for the champion and the challenger "
+                            "each iteration; count them in the cost per iteration and retire some (validate)")
+        rsilib.emit({"exported": out, "count": len(out), "warnings": warnings, "from": str(path)})
 
     if a.cmd == "add":
         cdir = it / "cases" / a.case
