@@ -1,6 +1,6 @@
-# rsi-skill
+# Recursive Self-Improvement for Claude Skills (`rsi-skill`)
 
-Recursive self-improvement for Agent Skills. Point it at a skill and a goal:
+An automated **recursive self-improvement (RSI) skill** for **Claude Code**, **Codex**, and **Agent Skills** (`SKILL.md`). Point it at any skill and an optimization goal—it generates fresh held-out eval cases every iteration, runs headless tests, grades outputs with deterministic and LLM-as-a-judge checks, and promotes improvements only when they beat the champion on unseen cases.
 
 ```
 /rsi-skill:rsi-skill run against <path-to-target-skill> until no major problems, max 4 iterations, $60
