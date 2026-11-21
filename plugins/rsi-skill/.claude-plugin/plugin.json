@@ -5,5 +5,7 @@
   "author": {
     "name": "zsu"
   },
-  "keywords": ["skills", "evals", "self-improvement", "rsi", "benchmark"]
+  "homepage": "https://github.com/zsu/rsi-skill",
+  "repository": "https://github.com/zsu/rsi-skill",
+  "keywords": ["agent-skills", "claude-code", "claude-skill", "skills", "evals", "llm-evaluation", "llm-as-a-judge", "skill-optimization", "prompt-optimization", "self-improvement", "recursive-self-improvement", "rsi", "benchmark"]
 }

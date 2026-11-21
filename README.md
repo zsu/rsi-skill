@@ -115,3 +115,13 @@ python -I tests/run_all.py
 
 `evals.json`, `grading.json` and `benchmark.json` use the same field names as Anthropic's skill-creator,
 so its tools can read them.
+
+## Related
+
+- [data-analyst](https://github.com/zsu/data-analyst): an Agent Skill for U.S. economic analysis with official
+  government data (FRED, BLS, BEA, Census, Treasury).
+- [data-analyst-mcp](https://github.com/zsu/data-analyst-mcp): the same data as an MCP server.
+- [zsu/agent-plugins](https://github.com/zsu/agent-plugins): the plugin catalog that installs all of these.
+- Project page: [zsu.github.io/rsi-skill](https://zsu.github.io/rsi-skill/).
+
+MIT licensed; see [LICENSE](LICENSE).

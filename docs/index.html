@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>rsi-skill: Recursive Self-Improvement for Claude Skills</title>
+  <meta name="description" content="Open-source Claude Code plugin that improves any Agent Skill (SKILL.md) automatically: fresh held-out eval cases every iteration, headless test runs, LLM-as-a-judge grading, and promotion only on unseen cases.">
+  <meta name="keywords" content="Claude Code, Agent Skills, SKILL.md, skill evals, LLM evaluation, LLM-as-a-judge, recursive self-improvement, prompt optimization, skill optimization, Codex">
+  <link rel="canonical" href="https://zsu.github.io/rsi-skill/">
+  <!-- Google Search Console: paste the HTML-tag verification line for https://zsu.github.io/rsi-skill/ here, e.g.
+       <meta name="google-site-verification" content="..."> -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="rsi-skill: Recursive Self-Improvement for Claude Skills">
+  <meta property="og:description" content="Open-source Claude Code plugin that improves any Agent Skill (SKILL.md) automatically: fresh held-out eval cases every iteration, headless test runs, LLM-as-a-judge grading, and promotion only on unseen cases.">
+  <meta property="og:url" content="https://zsu.github.io/rsi-skill/">
+  <meta name="twitter:card" content="summary">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "rsi-skill", "description": "Open-source Claude Code plugin that improves any Agent Skill (SKILL.md) automatically: fresh held-out eval cases every iteration, headless test runs, LLM-as-a-judge grading, and promotion only on unseen cases.", "url": "https://zsu.github.io/rsi-skill/", "codeRepository": "https://github.com/zsu/rsi-skill", "programmingLanguage": "Python", "license": "https://opensource.org/licenses/MIT", "author": {"@type": "Person", "name": "zsu", "url": "https://github.com/zsu"}, "keywords": "Claude Code, Agent Skills, SKILL.md, skill evals, LLM evaluation, LLM-as-a-judge, recursive self-improvement, prompt optimization, skill optimization, Codex"}</script>
+  <style>
+:root{--bg:#fbfbf9;--fg:#1d1f22;--muted:#5b6068;--line:#e3e3de;--card:#ffffff;--accent:#1f5fbf;--code:#f2f2ee}
+@media (prefers-color-scheme:dark){:root{--bg:#141619;--fg:#e8e9eb;--muted:#a0a6ae;--line:#2c3036;--card:#1b1e22;--accent:#7fb0ff;--code:#22262b}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:780px;margin:0 auto;padding:48px 16px 64px}
+header p.kicker{margin:0 0 8px;color:var(--muted);font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.15;margin:0 0 16px}
+h2{font-size:22px;margin:40px 0 12px}
+p.lede{font-size:19px;color:var(--fg);margin:0 0 20px}
+a{color:var(--accent)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 8px}
+.links a{display:inline-block;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);text-decoration:none;font-weight:600}
+.links a.primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+pre{background:var(--code);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:14px;line-height:1.5}
+code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.92em}
+ul,ol{padding-left:22px}
+li{margin:4px 0}
+.tags{color:var(--muted);font-size:15px}
+footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">Agent Skill · Claude Code plugin · MIT</p>
+      <h1>Recursive self-improvement for Claude Code skills</h1>
+      <p class="lede"><code>rsi-skill</code> is an open-source <strong>recursive self-improvement (RSI)</strong> loop for <strong>Claude Code</strong>, <strong>Codex</strong> and <strong>Agent Skills</strong>. Point it at any <code>SKILL.md</code> and a goal: it writes fresh eval cases every iteration, runs the skill headless, grades the runs with deterministic and LLM-as-a-judge checks, and keeps a change only when it wins on cases nobody has seen.</p>
+    </header>
+    <nav class="links" aria-label="Project links">
+      <a class="primary" href="https://github.com/zsu/rsi-skill">View on GitHub</a>
+      <a href="https://github.com/zsu/agent-plugins">Plugin catalog</a>
+    </nav>
+
+    <h2>Install</h2>
+    <p><strong>Claude Code</strong></p>
+    <pre><code>/plugin marketplace add zsu/agent-plugins
+/plugin install rsi-skill@zsu</code></pre>
+    <p><strong>Codex</strong>: <code>codex plugin marketplace add zsu/agent-plugins</code>, then install
+    <code>rsi-skill</code> from the Plugins directory. Test runs use the <code>claude</code> CLI headless, so Claude Code
+    must be installed and signed in.</p>
+
+    <h2>Run it</h2>
+    <pre><code>/rsi-skill:rsi-skill run against &lt;path-to-skill&gt; until no major problems, max 4 iterations, $60</code></pre>
+    <p>Goals can be "no major problems", "pass rate ≥ 90%" or a focus such as "unattended mode". Limits can be
+    iterations, time, tokens or cost.</p>
+
+    <h2>The loop</h2>
+    <ol>
+      <li>Profiles the skill and turns your goal into a measurable <code>goal.json</code>.</li>
+      <li>Writes <strong>new</strong> eval cases in every iteration, so the skill is never tuned to a fixed benchmark.</li>
+      <li>Runs the skill headless (<code>claude -p</code>) in a sandbox for each case.</li>
+      <li>Grades every run with deterministic checks first, then an evidence-required LLM grader.</li>
+      <li>Lets an improver edit anything in the skill: SKILL.md, scripts, references, assets and tests.</li>
+      <li>Promotes the challenger only when it beats the champion on the <strong>next</strong> iteration's unseen cases.</li>
+      <li>Stops on goal, budget, plateau, or problems that are stuck or external.</li>
+    </ol>
+    <p>The best version comes back as uncommitted edits to review with <code>git diff</code>. Its
+    <code>evals.json</code>, <code>grading.json</code> and <code>benchmark.json</code> use the same field names as
+    Anthropic's skill-creator.</p>
+
+    <footer>
+      <p>MIT licensed. Source and issues on <a href="https://github.com/zsu/rsi-skill">GitHub</a>. Other projects:
+      <a href="https://zsu.github.io/data-analyst/">data-analyst</a> · <a href="https://zsu.github.io/data-analyst-mcp/">data-analyst-mcp</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>
